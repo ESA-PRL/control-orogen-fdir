@@ -1,0 +1,26 @@
+name "fdir"
+
+import_types_from "std"
+import_types_from "base"
+import_types_from "fdirTypes.hpp"
+
+task_context "Task" do
+    needs_configuration
+
+    property "max_slip", "double"
+    property "max_roll", "double"
+    property "max_pitch", "double"
+
+    # TODO add input port from platform driver for motor status
+    input_port "slip_ratio", "double"
+    input_port "attitude", "/base/samples/RigidBodyState"
+    input_port "trajectory_status", "int"
+
+    output_port "fault_detected", "bool"
+    output_port "fdir_state", "fdir/FdirState"
+
+    runtime_states :NOMINAL, :EXCEPTION_IMU, :EXCEPTION_MOTORS, :EXCEPTION_TRAJECTORY, :EXCEPTION_SLIPPAGE
+
+    periodic 0.1
+end
+
