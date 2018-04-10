@@ -16,11 +16,12 @@ task_context "Task" do
     input_port "attitude", "/base/samples/RigidBodyState"
     #input_port "trajectory_status", "waypoint_navigation_lib/NavigationState" #TODO use this instead of int
     input_port "trajectory_status", "int"
+    input_port "hazard_detected", "bool"
 
     output_port "fault_detected", "bool"
     output_port "fdir_state", "fdir/FdirState"
 
-    runtime_states :NOMINAL, :EXCEPTION_ATTITUDE, :EXCEPTION_MOTORS, :EXCEPTION_TRAJECTORY, :EXCEPTION_SLIPPAGE
+    runtime_states :NOMINAL, :EXCEPTION_ATTITUDE, :EXCEPTION_MOTORS, :EXCEPTION_TRAJECTORY, :EXCEPTION_SLIPPAGE, :EXCEPTION_HAZARD
 
     periodic 0.1
 end

@@ -76,6 +76,20 @@ void Task::updateHook()
         }
     }
 
+    bool hazard_detected;
+    if (_hazard_detected.read(hazard_detected) == RTT::NewData)
+    {
+        //if (trajectory_status == waypoint_navigation_lib::OUT_OF_BOUNDARIES)
+        if (hazard_detected) //TODO: let waypoint navigation output enum instead of integer
+        {
+            state(EXCEPTION_HAZARD);
+        }
+        else if (state() == EXCEPTION_HAZARD)
+        {
+            state(NOMINAL);
+        }
+    }
+
     switch(state())
     {
         case NOMINAL:
@@ -93,6 +107,10 @@ void Task::updateHook()
         case EXCEPTION_TRAJECTORY:
             _fault_detected.write(true);
             _fdir_state.write(FDIR_EXCEPTION_TRAJECTORY);
+            break;
+        case EXCEPTION_HAZARD:
+            _fault_detected.write(true);
+            _fdir_state.write(FDIR_EXCEPTION_HAZARD);
             break;
         case RUNNING:
             state(NOMINAL);
