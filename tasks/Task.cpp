@@ -94,6 +94,9 @@ void Task::updateHook()
             _fault_detected.write(true);
             _fdir_state.write(fdir::FdirState::EXCEPTION_TRAJECTORY);
             break;
+        case fdir::TaskBase::States::RUNNING:
+            state(fdir::TaskBase::States::NOMINAL);
+            break;
         default:
             std::cerr << "FDIR: Should not reach this point. State is: " << state() << std::endl;
             break;
