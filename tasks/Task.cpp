@@ -38,11 +38,11 @@ void Task::updateHook()
     {
         if (slip_ratio > _max_slip.value())
         {
-            state(fdir::TaskBase::States::EXCEPTION_SLIPPAGE);
+            state(EXCEPTION_SLIPPAGE);
         }
-        else if (state() == fdir::TaskBase::States::EXCEPTION_SLIPPAGE)
+        else if (state() == EXCEPTION_SLIPPAGE)
         {
-            state(fdir::TaskBase::States::NOMINAL);
+            state(NOMINAL);
         }
     }
 
@@ -54,11 +54,11 @@ void Task::updateHook()
                 std::fabs(attitude.getPitch()) > _max_pitch.value()
            )
         {
-            state(fdir::TaskBase::States::EXCEPTION_ATTITUDE);
+            state(EXCEPTION_ATTITUDE);
         }
-        else if (state() == fdir::TaskBase::States::EXCEPTION_ATTITUDE)
+        else if (state() == EXCEPTION_ATTITUDE)
         {
-            state(fdir::TaskBase::States::NOMINAL);
+            state(NOMINAL);
         }
     }
 
@@ -68,34 +68,34 @@ void Task::updateHook()
         //if (trajectory_status == waypoint_navigation_lib::OUT_OF_BOUNDARIES)
         if (trajectory_status == 3) //TODO: let waypoint navigation output enum instead of integer
         {
-            state(fdir::TaskBase::States::EXCEPTION_TRAJECTORY);
+            state(EXCEPTION_TRAJECTORY);
         }
-        else if (state() == fdir::TaskBase::States::EXCEPTION_TRAJECTORY)
+        else if (state() == EXCEPTION_TRAJECTORY)
         {
-            state(fdir::TaskBase::States::NOMINAL);
+            state(NOMINAL);
         }
     }
 
     switch(state())
     {
-        case fdir::TaskBase::States::NOMINAL:
+        case NOMINAL:
             _fault_detected.write(false);
-            _fdir_state.write(fdir::FdirState::NOMINAL);
+            _fdir_state.write(FDIR_NOMINAL);
             break;
-        case fdir::TaskBase::States::EXCEPTION_ATTITUDE:
+        case EXCEPTION_ATTITUDE:
             _fault_detected.write(true);
-            _fdir_state.write(fdir::FdirState::EXCEPTION_ATTITUDE);
+            _fdir_state.write(FDIR_EXCEPTION_ATTITUDE);
             break;
-        case fdir::TaskBase::States::EXCEPTION_SLIPPAGE:
+        case EXCEPTION_SLIPPAGE:
             _fault_detected.write(true);
-            _fdir_state.write(fdir::FdirState::EXCEPTION_SLIPPAGE);
+            _fdir_state.write(FDIR_EXCEPTION_SLIPPAGE);
             break;
-        case fdir::TaskBase::States::EXCEPTION_TRAJECTORY:
+        case EXCEPTION_TRAJECTORY:
             _fault_detected.write(true);
-            _fdir_state.write(fdir::FdirState::EXCEPTION_TRAJECTORY);
+            _fdir_state.write(FDIR_EXCEPTION_TRAJECTORY);
             break;
-        case fdir::TaskBase::States::RUNNING:
-            state(fdir::TaskBase::States::NOMINAL);
+        case RUNNING:
+            state(NOMINAL);
             break;
         default:
             std::cerr << "FDIR: Should not reach this point. State is: " << state() << std::endl;

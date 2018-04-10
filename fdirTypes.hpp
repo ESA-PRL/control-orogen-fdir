@@ -3,11 +3,12 @@
 namespace fdir{
     enum FdirState
     {
-        NOMINAL,
-        EXCEPTION_ATTITUDE,
-        EXCEPTION_TRAJECTORY,
-        EXCEPTION_MOTORS,
-        EXCEPTION_SLIPPAGE
+        FDIR_NOMINAL,
+        FDIR_EXCEPTION_ATTITUDE,
+        FDIR_EXCEPTION_TRAJECTORY,
+        FDIR_EXCEPTION_MOTORS,
+        FDIR_EXCEPTION_SLIPPAGE,
+        FDIR_EXCEPTION_HAZARD
     };
 }
 #endif
