@@ -1,6 +1,8 @@
 #include "Task.hpp"
 #include <cmath>
 
+const double DEG2RAD = 3.141592/180;
+
 using namespace fdir;
 
 Task::Task(std::string const& name)
@@ -50,8 +52,8 @@ void Task::updateHook()
     if (_attitude.read(attitude) == RTT::NewData)
     {
         if (
-                std::fabs(attitude.getRoll()) > _max_roll.value() ||
-                std::fabs(attitude.getPitch()) > _max_pitch.value()
+                std::fabs(attitude.getRoll()) > (_max_roll.value()*DEG2RAD) ||
+                std::fabs(attitude.getPitch()) > (_max_pitch.value()*DEG2RAD)
            )
         {
             state(EXCEPTION_ATTITUDE);
