@@ -64,6 +64,19 @@ void Task::updateHook()
         }
     }
 
+    int error_in_motor;
+    if (_error_in_motor.read(error_in_motor) == RTT::NewData)
+    {
+        if (error_in_motor) // Any number different than 0 is an error in that motor number. If it is 0 then all motors are ok.
+        {
+            state(EXCEPTION_MOTORS);
+        }
+        else if (state() == EXCEPTION_MOTORS)
+        {
+            state(NOMINAL);
+        }
+    }
+
     int trajectory_status;
     if (_trajectory_status.read(trajectory_status) == RTT::NewData)
     {
@@ -96,6 +109,10 @@ void Task::updateHook()
         case NOMINAL:
             _fault_detected.write(false);
             _fdir_state.write(FDIR_NOMINAL);
+            break;
+        case EXCEPTION_MOTORS:
+            _fault_detected.write(true);
+            _fdir_state.write(FDIR_EXCEPTION_MOTORS);
             break;
         case EXCEPTION_ATTITUDE:
             _fault_detected.write(true);

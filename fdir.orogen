@@ -11,7 +11,7 @@ task_context "Task" do
     property "max_roll", "double"
     property "max_pitch", "double"
 
-    # TODO add input port from platform driver for motor status
+    input_port "error_in_motor", "int"
     input_port "slip_ratio", "double"
     input_port "attitude", "/base/samples/RigidBodyState"
     #input_port "trajectory_status", "waypoint_navigation_lib/NavigationState" #TODO use this instead of int
