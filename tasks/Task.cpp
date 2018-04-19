@@ -81,8 +81,7 @@ void Task::updateHook()
     bool hazard_detected;
     if (_hazard_detected.read(hazard_detected) == RTT::NewData)
     {
-        //if (trajectory_status == waypoint_navigation_lib::OUT_OF_BOUNDARIES)
-        if (hazard_detected) //TODO: let waypoint navigation output enum instead of integer
+        if (hazard_detected)
         {
             state(EXCEPTION_HAZARD);
         }
