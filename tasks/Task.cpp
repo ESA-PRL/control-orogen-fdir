@@ -35,109 +35,98 @@ void Task::updateHook()
 {
     TaskBase::updateHook();
 
+    bool state_switched = false;
+
     double slip_ratio;
     if (_slip_ratio.read(slip_ratio) == RTT::NewData)
     {
-        if (slip_ratio > _max_slip.value())
-        {
-            state(EXCEPTION_SLIPPAGE);
-        }
-        else if (state() == EXCEPTION_SLIPPAGE)
-        {
-            state(NOMINAL);
-        }
+        state_switched |= switchState(slip_ratio > _max_slip.value(), EXCEPTION_SLIPPAGE);
     }
 
     base::samples::RigidBodyState attitude;
     if (_attitude.read(attitude) == RTT::NewData)
     {
-        if (
+        bool fault_detected =
                 std::fabs(attitude.getRoll()) > (_max_roll.value()*DEG2RAD) ||
-                std::fabs(attitude.getPitch()) > (_max_pitch.value()*DEG2RAD)
-           )
-        {
-            state(EXCEPTION_ATTITUDE);
-        }
-        else if (state() == EXCEPTION_ATTITUDE)
-        {
-            state(NOMINAL);
-        }
+                std::fabs(attitude.getPitch()) > (_max_pitch.value()*DEG2RAD);
+        state_switched |= switchState(fault_detected, EXCEPTION_ATTITUDE);
     }
 
     int error_in_motor;
     if (_error_in_motor.read(error_in_motor) == RTT::NewData)
     {
-        if (error_in_motor) // Any number different than 0 is an error in that motor number. If it is 0 then all motors are ok.
-        {
-            state(EXCEPTION_MOTORS);
-        }
-        else if (state() == EXCEPTION_MOTORS)
-        {
-            state(NOMINAL);
-        }
+        // Any number different than 0 is an error in that motor number. If it is 0 then all motors are ok.
+        state_switched |= switchState(error_in_motor, EXCEPTION_MOTORS);
     }
 
     int trajectory_status;
     if (_trajectory_status.read(trajectory_status) == RTT::NewData)
     {
         //if (trajectory_status == waypoint_navigation_lib::OUT_OF_BOUNDARIES)
-        if (trajectory_status == 3) //TODO: let waypoint navigation output enum instead of integer
-        {
-            state(EXCEPTION_TRAJECTORY);
-        }
-        else if (state() == EXCEPTION_TRAJECTORY)
-        {
-            state(NOMINAL);
-        }
+        //TODO: let waypoint navigation output enum instead of integer
+        state_switched |= switchState(trajectory_status == 3, EXCEPTION_TRAJECTORY);
     }
 
     bool hazard_detected;
     if (_hazard_detected.read(hazard_detected) == RTT::NewData)
     {
-        if (hazard_detected)
-        {
-            state(EXCEPTION_HAZARD);
-        }
-        else if (state() == EXCEPTION_HAZARD)
-        {
-            state(NOMINAL);
-        }
+        state_switched |= switchState(hazard_detected, EXCEPTION_HAZARD);
     }
 
-    switch(state())
+    if (state_switched)
     {
-        case NOMINAL:
-            _fault_detected.write(false);
-            _fdir_state.write(FDIR_NOMINAL);
-            break;
-        case EXCEPTION_MOTORS:
-            _fault_detected.write(true);
-            _fdir_state.write(FDIR_EXCEPTION_MOTORS);
-            break;
-        case EXCEPTION_ATTITUDE:
-            _fault_detected.write(true);
-            _fdir_state.write(FDIR_EXCEPTION_ATTITUDE);
-            break;
-        case EXCEPTION_SLIPPAGE:
-            _fault_detected.write(true);
-            _fdir_state.write(FDIR_EXCEPTION_SLIPPAGE);
-            break;
-        case EXCEPTION_TRAJECTORY:
-            _fault_detected.write(true);
-            _fdir_state.write(FDIR_EXCEPTION_TRAJECTORY);
-            break;
-        case EXCEPTION_HAZARD:
-            _fault_detected.write(true);
-            _fdir_state.write(FDIR_EXCEPTION_HAZARD);
-            break;
-        case RUNNING:
-            state(NOMINAL);
-            break;
-        default:
-            std::cerr << "FDIR: Should not reach this point. State is: " << state() << std::endl;
-            break;
+        switch(state())
+        {
+            case NOMINAL:
+                _fault_detected.write(false);
+                _fdir_state.write(FDIR_NOMINAL);
+                break;
+            case EXCEPTION_MOTORS:
+                _fault_detected.write(true);
+                _fdir_state.write(FDIR_EXCEPTION_MOTORS);
+                break;
+            case EXCEPTION_ATTITUDE:
+                _fault_detected.write(true);
+                _fdir_state.write(FDIR_EXCEPTION_ATTITUDE);
+                break;
+            case EXCEPTION_SLIPPAGE:
+                _fault_detected.write(true);
+                _fdir_state.write(FDIR_EXCEPTION_SLIPPAGE);
+                break;
+            case EXCEPTION_TRAJECTORY:
+                _fault_detected.write(true);
+                _fdir_state.write(FDIR_EXCEPTION_TRAJECTORY);
+                break;
+            case EXCEPTION_HAZARD:
+                _fault_detected.write(true);
+                _fdir_state.write(FDIR_EXCEPTION_HAZARD);
+                break;
+            case RUNNING:
+                state(NOMINAL);
+                break;
+            default:
+                std::cerr << "FDIR: Should not reach this point. State is: " << state() << std::endl;
+                break;
+        }
     }
 }
+
+bool Task::switchState(bool fault_detected, TaskBase::States fault_state)
+{
+    bool state_switched = false;
+    if (fault_detected && state() != fault_state)
+    {
+        state(fault_state);
+        state_switched = true;
+    }
+    else if (!fault_detected && state() == fault_state)
+    {
+        state(NOMINAL);
+        state_switched = true;
+    }
+    return state_switched;
+}
+
 void Task::errorHook()
 {
     TaskBase::errorHook();

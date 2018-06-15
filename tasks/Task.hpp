@@ -9,6 +9,10 @@ namespace fdir{
     {
 	friend class TaskBase;
     protected:
+        // Switches to fault_state or NOMINAL state depending on current state
+        // and fault_detected.
+        // Returns whether the state had to be switched.
+        bool switchState(bool fault_detected, TaskBase::States fault_state);
 
     public:
         Task(std::string const& name = "fdir::Task");
@@ -25,4 +29,3 @@ namespace fdir{
 }
 
 #endif
-
