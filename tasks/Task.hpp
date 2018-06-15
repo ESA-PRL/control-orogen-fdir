@@ -14,6 +14,9 @@ namespace fdir{
         // Returns whether the state had to be switched.
         bool switchState(bool fault_detected, TaskBase::States fault_state);
 
+        // Writes to output ports depending on FDIR state only.
+        void writeToPorts();
+
     public:
         Task(std::string const& name = "fdir::Task");
         Task(std::string const& name, RTT::ExecutionEngine* engine);

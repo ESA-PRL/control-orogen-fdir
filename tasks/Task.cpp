@@ -25,12 +25,14 @@ bool Task::configureHook()
         return false;
     return true;
 }
+
 bool Task::startHook()
 {
     if (! TaskBase::startHook())
         return false;
     return true;
 }
+
 void Task::updateHook()
 {
     TaskBase::updateHook();
@@ -75,39 +77,7 @@ void Task::updateHook()
 
     if (state_switched)
     {
-        switch(state())
-        {
-            case NOMINAL:
-                _fault_detected.write(false);
-                _fdir_state.write(FDIR_NOMINAL);
-                break;
-            case EXCEPTION_MOTORS:
-                _fault_detected.write(true);
-                _fdir_state.write(FDIR_EXCEPTION_MOTORS);
-                break;
-            case EXCEPTION_ATTITUDE:
-                _fault_detected.write(true);
-                _fdir_state.write(FDIR_EXCEPTION_ATTITUDE);
-                break;
-            case EXCEPTION_SLIPPAGE:
-                _fault_detected.write(true);
-                _fdir_state.write(FDIR_EXCEPTION_SLIPPAGE);
-                break;
-            case EXCEPTION_TRAJECTORY:
-                _fault_detected.write(true);
-                _fdir_state.write(FDIR_EXCEPTION_TRAJECTORY);
-                break;
-            case EXCEPTION_HAZARD:
-                _fault_detected.write(true);
-                _fdir_state.write(FDIR_EXCEPTION_HAZARD);
-                break;
-            case RUNNING:
-                state(NOMINAL);
-                break;
-            default:
-                std::cerr << "FDIR: Should not reach this point. State is: " << state() << std::endl;
-                break;
-        }
+        writeToPorts();
     }
 }
 
@@ -125,6 +95,44 @@ bool Task::switchState(bool fault_detected, TaskBase::States fault_state)
         state_switched = true;
     }
     return state_switched;
+}
+
+void Task::writeToPorts()
+{
+    switch(state())
+    {
+        case NOMINAL:
+            _fault_detected.write(false);
+            _fdir_state.write(FDIR_NOMINAL);
+            break;
+        case EXCEPTION_MOTORS:
+            _fault_detected.write(true);
+            _fdir_state.write(FDIR_EXCEPTION_MOTORS);
+            break;
+        case EXCEPTION_ATTITUDE:
+            _fault_detected.write(true);
+            _fdir_state.write(FDIR_EXCEPTION_ATTITUDE);
+            break;
+        case EXCEPTION_SLIPPAGE:
+            _fault_detected.write(true);
+            _fdir_state.write(FDIR_EXCEPTION_SLIPPAGE);
+            break;
+        case EXCEPTION_TRAJECTORY:
+            _fault_detected.write(true);
+            _fdir_state.write(FDIR_EXCEPTION_TRAJECTORY);
+            break;
+        case EXCEPTION_HAZARD:
+            _fault_detected.write(true);
+            _path_following_speed.write(0.0);
+            _fdir_state.write(FDIR_EXCEPTION_HAZARD);
+            break;
+        case RUNNING:
+            state(NOMINAL);
+            break;
+        default:
+            std::cerr << "FDIR: Should not reach this point. State is: " << state() << std::endl;
+            break;
+    }
 }
 
 void Task::errorHook()
