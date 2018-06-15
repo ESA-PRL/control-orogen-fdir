@@ -122,9 +122,12 @@ void Task::writeToPorts()
             _fdir_state.write(FDIR_EXCEPTION_TRAJECTORY);
             break;
         case EXCEPTION_HAZARD:
-            _fault_detected.write(true);
-            _path_following_speed.write(0.0);
-            _fdir_state.write(FDIR_EXCEPTION_HAZARD);
+            if (_write_hazard_exception.value())
+            {
+                _fault_detected.write(true);
+                _fdir_state.write(FDIR_EXCEPTION_HAZARD);
+            }
+            _cancel_trajectory.write(true);
             break;
         case RUNNING:
             state(NOMINAL);
