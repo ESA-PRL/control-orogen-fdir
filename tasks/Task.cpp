@@ -1,7 +1,7 @@
 #include "Task.hpp"
 #include <cmath>
 
-const double DEG2RAD = 3.141592/180;
+const double DEG2RAD = M_PI/180;
 
 using namespace fdir;
 
