@@ -21,8 +21,6 @@ task_context "Task" do
 
     output_port "fault_detected", "bool"
     output_port "fdir_state", "fdir/FdirState"
-    output_port("cancel_trajectory", "bool").
-        doc("Stop the rover in path following without going to emergency state")
 
     runtime_states :NOMINAL, :EXCEPTION_ATTITUDE, :EXCEPTION_MOTORS, :EXCEPTION_TRAJECTORY, :EXCEPTION_SLIPPAGE, :EXCEPTION_HAZARD
 
